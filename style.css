@@ -339,90 +339,20 @@ body {
   box-shadow: 0 30px 60px -20px rgba(0,0,0,0.4);
 }
 
-/* ---------- Contenedor de foto con overlay ---------- */
-.photo-container {
-  position: relative;
+.photo-modal-card img {
   width: 100%;
   border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--ink);
-  margin-bottom: 16px;
-}
-
-.photo-container img {
-  width: 100%;
   display: block;
+  margin-bottom: 16px;
+  background: var(--ink);
 }
 
-.photo-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  padding: 16px;
-}
-
-.overlay-badge {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  background: rgba(255, 255, 255, 0.95);
-  padding: 12px 16px;
-  border-radius: 12px;
-  border: 3px solid #999;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(8px);
-  animation: slideInBadge 0.5s ease-out;
-}
-
-@keyframes slideInBadge {
-  from {
-    opacity: 0;
-    transform: translateY(20px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.badge-icon {
-  font-size: 2.2rem;
-  display: inline-block;
-  line-height: 1;
-}
-
-.badge-text {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-}
-
-.badge-label {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--ink);
-  line-height: 1.1;
-}
-
-.badge-value {
-  font-family: var(--font-mono);
-  font-weight: 600;
-  font-size: 0.8rem;
-  color: var(--ink-soft);
-}
-
-/* ---------- Resultado de foto ---------- */
 .photo-modal-result {
   display: flex;
   flex-direction: column;
   gap: 2px;
   margin-bottom: 18px;
 }
-
 #photo-result-label {
   font-family: var(--font-mono);
   font-size: 0.7rem;
@@ -430,7 +360,6 @@ body {
   letter-spacing: 0.08em;
   color: var(--ink-soft);
 }
-
 #photo-result-value {
   font-family: var(--font-display);
   font-weight: 700;
@@ -451,29 +380,10 @@ body {
   .header h1 { font-size: 2.1rem; }
   .viewfinder { width: 210px; height: 210px; }
   .btn { padding: 11px 18px; font-size: 0.88rem; }
-  
-  .overlay-badge {
-    flex-direction: column;
-    gap: 8px;
-    padding: 10px 12px;
-  }
-  
-  .badge-icon {
-    font-size: 1.8rem;
-  }
-  
-  .badge-label {
-    font-size: 0.9rem;
-  }
-  
-  .badge-value {
-    font-size: 0.75rem;
-  }
 }
 
 /* ---------- Accesibilidad: reducir movimiento ---------- */
 @media (prefers-reduced-motion: reduce) {
   .scan-line { animation: none; opacity: 0.6; top: 50%; }
   .btn, .pred-bar-fill, .display-screen { transition: none; }
-  .overlay-badge { animation: none; }
 }
