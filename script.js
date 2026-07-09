@@ -11,17 +11,23 @@ const CLASS_INFO = {
   "organic": {
     label: "🌱 Orgánico aprovechable",
     desc: "Se traslada a plantas de compostaje biológico.",
-    tone: "organic"
+    tone: "organic",
+    icon: "🌱",
+    color: "#3fa66b"
   },
   "recyclable": {
     label: "💧 Material reciclable",
     desc: "Prioridad de clasificación: PET, PEAD y PP.",
-    tone: "recyclable"
+    tone: "recyclable",
+    icon: "♻️",
+    color: "#2f80c5"
   },
   "non-recyclable": {
     label: "🗑️ No aprovechable",
     desc: "Va directo a disposición final (relleno sanitario).",
-    tone: "non-recyclable"
+    tone: "non-recyclable",
+    icon: "🗑️",
+    color: "#74707f"
   }
 };
 
@@ -46,6 +52,11 @@ const els = {
   photoResultValue: document.getElementById("photo-result-value"),
   retakeBtn: document.getElementById("retake-btn"),
   downloadBtn: document.getElementById("download-btn"),
+  photoOverlay: document.getElementById("photo-overlay"),
+  overlayBadge: document.getElementById("overlay-badge"),
+  badgeIcon: document.getElementById("badge-icon"),
+  badgeLabel: document.getElementById("badge-label"),
+  badgeValue: document.getElementById("badge-value"),
 };
 
 // ---------- Estado ----------
@@ -279,11 +290,27 @@ function capturePhoto() {
   els.downloadBtn.href = dataUrl;
   els.downloadBtn.download = `ecoscan-residuo-${stamp}.png`;
 
+  // Actualizar el badge del overlay y los textos
   if (lastPrediction && CLASS_INFO[lastPrediction.key]) {
     const info = CLASS_INFO[lastPrediction.key];
+    const pct = Math.round(lastPrediction.probability * 100);
+
+    // Actualizar overlay badge
+    els.badgeIcon.textContent = info.icon;
+    els.badgeLabel.textContent = info.label.replace(/[🌱♻️🗑️]/g, '').trim();
+    els.badgeValue.textContent = `${pct}%`;
+    els.overlayBadge.style.borderColor = info.color;
+
+    // Actualizar textos inferiores
     els.photoResultLabel.textContent = "Resultado del escaneo";
-    els.photoResultValue.textContent = `${info.label} · ${Math.round(lastPrediction.probability * 100)}%`;
+    els.photoResultValue.textContent = `${info.label} · ${pct}%`;
   } else {
+    // Si no hay predicción clara
+    els.badgeIcon.textContent = "❓";
+    els.badgeLabel.textContent = "Analizando...";
+    els.badgeValue.textContent = "—";
+    els.overlayBadge.style.borderColor = "#999";
+
     els.photoResultLabel.textContent = "Resultado del escaneo";
     els.photoResultValue.textContent = "Sin clasificar todavía";
   }
