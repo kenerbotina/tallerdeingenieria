@@ -99,19 +99,49 @@ async function detectPreferredFacing() {
   return "user";
 }
 
-// Dibuja el video actual en un canvas cuadrado, recortando "cover"
-function drawVideoToCanvas(ctx, size, videoEl) {
+// Calcula un recorte tipo "cover" para que el frame encaje limpio en el canvas.
+function computeCoverRect(sourceWidth, sourceHeight, targetWidth, targetHeight) {
+  const sourceRatio = sourceWidth / sourceHeight;
+  const targetRatio = targetWidth / targetHeight;
+
+  let drawWidth = targetWidth;
+  let drawHeight = targetHeight;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  if (sourceRatio > targetRatio) {
+    drawHeight = targetHeight;
+    drawWidth = targetHeight * sourceRatio;
+    offsetX = -(drawWidth - targetWidth) / 2;
+  } else {
+    drawWidth = targetWidth;
+    drawHeight = targetWidth / sourceRatio;
+    offsetY = -(drawHeight - targetHeight) / 2;
+  }
+
+  return { drawWidth, drawHeight, offsetX, offsetY };
+}
+
+function drawVideoToCanvas(ctx, targetWidth, targetHeight, videoEl, options = {}) {
   const vw = videoEl.videoWidth;
   const vh = videoEl.videoHeight;
-  if (!vw || !vh) return;
+  if (!vw || !vh) return false;
 
-  const scale = Math.max(size / vw, size / vh);
-  const sw = size / scale;
-  const sh = size / scale;
-  const sx = (vw - sw) / 2;
-  const sy = (vh - sh) / 2;
+  const { mirror = false } = options;
+  const rect = computeCoverRect(vw, vh, targetWidth, targetHeight);
 
-  ctx.drawImage(videoEl, sx, sy, sw, sh, 0, 0, size, size);
+  ctx.save();
+  ctx.clearRect(0, 0, targetWidth, targetHeight);
+  ctx.imageSmoothingEnabled = true;
+
+  if (mirror) {
+    ctx.translate(targetWidth, 0);
+    ctx.scale(-1, 1);
+  }
+
+  ctx.drawImage(videoEl, 0, 0, vw, vh, rect.offsetX, rect.offsetY, rect.drawWidth, rect.drawHeight);
+  ctx.restore();
+  return true;
 }
 
 // =========================================================
@@ -202,7 +232,7 @@ async function refreshCameraCount() {
 async function predictLoop() {
   if (!running) return;
 
-  drawVideoToCanvas(predictCtx, PREDICT_SIZE, els.video);
+  drawVideoToCanvas(predictCtx, PREDICT_SIZE, PREDICT_SIZE, els.video);
 
   try {
     const prediction = await model.predict(predictCanvas);
@@ -264,13 +294,11 @@ function capturePhoto() {
   els.captureCanvas.height = vh;
   const ctx = els.captureCanvas.getContext("2d");
 
-  ctx.save();
-  if (currentFacing === "user") {
-    ctx.translate(vw, 0);
-    ctx.scale(-1, 1);
-  }
-  ctx.drawImage(els.video, 0, 0, vw, vh);
-  ctx.restore();
+  const didDraw = drawVideoToCanvas(ctx, vw, vh, els.video, {
+    mirror: currentFacing === "user"
+  });
+
+  if (!didDraw) return;
 
   const dataUrl = els.captureCanvas.toDataURL("image/png");
   els.photoPreview.src = dataUrl;
